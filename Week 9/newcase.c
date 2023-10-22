@@ -23,6 +23,7 @@ typedef struct Transaction
 {
     char code[50];
     char title[100];
+    TYPE bookType;
     float price;
     int count;
     float totalPrice;
@@ -102,6 +103,12 @@ void menuDeleteBook(BOOK *listBook, int *count);
  * Function to handle menu Delete History
  */
 void menuDeleteHistory(TRANSACTION *listTransaction, int *countH);
+
+/**
+ * Function to handle menu Edit Book
+ */
+void menuEditBook(BOOK *listBook, int count);
+
 /**
  * Function check is exists a book with same title
  */
@@ -143,13 +150,14 @@ int main()
         printf("4. Pembelian\n");
         printf("5. Delete History\n");
         printf("6. Delete Buku\n");
-        printf("7. Keluar\n");
+        printf("7. Edit Buku\n");
+        printf("8. Keluar\n");
 
         int menu = 0;
         while (true)
         {
             char input[20];
-            printf("\nSilahkan pilih menu (1-6): ");
+            printf("\nSilahkan pilih menu (1-8): ");
             scanf("%[^\n]s", input);
             getchar();
 
@@ -158,7 +166,7 @@ int main()
             {
                 // Convert string to int
                 menu = atoi(input);
-                if (menu >= 1 && menu <= 7)
+                if (menu >= 1 && menu <= 8)
                 {
                     break;
                 }
@@ -187,6 +195,10 @@ int main()
             menuDeleteBook(listBook, &count);
             break;
         case 7:
+            menuEditBook(listBook, count);
+            break;
+
+        case 8:
             printf("Terima kasih sudah menggunakan program kami.\n");
             stillPlay = false;
             break;
@@ -263,6 +275,7 @@ void menuInputTransaction(TRANSACTION *listTransaction, BOOK *listBook, int *cou
 
                         strcpy(trx.title, selectedBook.title);
                         strcpy(trx.code, selectedBook.code);
+                        trx.bookType = selectedBook.bookType;
                         trx.price = selectedBook.price;
                         break;
                     }
@@ -505,6 +518,7 @@ void printBook(BOOK book)
 {
     printf("%-20s: %s\n", "Kode Buku", book.code);
     printf("%-20s: %s\n", "Judul Buku", book.title);
+    printf("%-20s: %s\n", "Jenis Buku", LIST_TYPE[book.bookType - 1]);
     printf("%-20s: %d\n", "Stok", book.stock);
     printf("%-20s: Rp%.2f\n", "Harga Buku", book.price);
 }
@@ -512,6 +526,7 @@ void printTransaction(TRANSACTION transaction)
 {
     printf("%-20s: %s\n", "Kode Buku", transaction.code);
     printf("%-20s: %s\n", "Judul Buku", transaction.title);
+    printf("%-20s: %s\n", "Jenis Buku", LIST_TYPE[transaction.bookType - 1]);
     printf("%-20s: Rp%.2f\n", "Harga Buku", transaction.price);
     printf("%-20s: %d pcs\n", "Jumlah", transaction.count);
     printf("%-20s: Rp%.2f\n", "Total Harga Buku", transaction.totalPrice);
@@ -624,6 +639,204 @@ void menuDeleteBook(BOOK *listBook, int *count)
     {
     }
 }
+
+void menuEditBook(BOOK *listBook, int count)
+{
+    clearscr();
+    if (count < 0)
+    {
+        printf("Anda tidak memiliki buku!\n");
+    }
+    else
+    {
+        // Menampilkan daftar buku yang bisa diubah
+        for (int i = 0; i <= count; i++)
+        {
+            printf("\nBuku ke: %-2d\n", i + 1);
+            printBook(listBook[i]);
+        }
+
+        int indexToEdit = -1;
+        while (true)
+        {
+            char input[20];
+            printf("Masukkan nomor urut buku yang ingin diubah (1-%d): ", count + 1);
+            scanf("%[^\n]s", input);
+            getchar();
+
+            // Memeriksa apakah nomor urut yang dimasukkan adalah angka yang valid
+            if (isValidNumber(input, false, false))
+            {
+                // Mengonversi ke integer
+                indexToEdit = atoi(input);
+                // Memeriksa apakah nomor urut yang dimasukkan valid
+                if (indexToEdit >= 1 && indexToEdit <= count + 1)
+                {
+                    break;
+                }
+            }
+            printf("Nomor urut buku tidak valid.\n");
+        }
+
+        // Menampilkan buku yang akan diubah
+        printf("\nBuku yang akan diubah:\n");
+        printBook(listBook[indexToEdit - 1]);
+
+        // Menampilkan menu untuk mengedit buku
+        printf("\nMenu Edit Buku:\n");
+        printf("1. Edit Kode Buku\n");
+        printf("2. Edit Judul Buku\n");
+        printf("3. Edit Jenis Buku\n");
+        printf("4. Edit Stok Buku\n");
+        printf("5. Edit Harga Buku\n");
+        printf("6. Kembali ke Menu Utama\n");
+
+        int editChoice = 0;
+        while (true)
+        {
+            char input[20];
+            printf("\nSilahkan pilih opsi edit (1-6): ");
+            scanf("%[^\n]s", input);
+            getchar();
+
+            // Memeriksa apakah pilihan yang dimasukkan adalah angka yang valid
+            if (isValidNumber(input, false, false))
+            {
+                // Mengonversi ke integer
+                editChoice = atoi(input);
+                if (editChoice >= 1 && editChoice <= 6)
+                {
+                    break;
+                }
+            }
+            printf("Opsi edit tidak valid!\n");
+        }
+
+        switch (editChoice)
+        {
+        case 1:
+            // Edit Kode Buku
+            printf("Masukkan Kode Buku yang baru: ");
+            char newCode[50];
+            scanf("%49s", newCode);
+            strcpy(listBook[indexToEdit - 1].code, newCode);
+            printf("Kode Buku Berhasil Diubah ");
+            while (getchar() != '\n')
+            {
+            }
+            break;
+
+        case 2:
+            // Edit Judul Buku
+            printf("Masukkan Judul Buku yang baru: ");
+            char newTitle[100];
+            scanf("%99s", newTitle);
+            strcpy(listBook[indexToEdit - 1].title, newTitle);
+            printf("Judul Buku Berhasil Diubah ");
+            while (getchar() != '\n')
+            {
+            }
+            break;
+
+        case 3:
+            // Edit Jenis Buku
+            printf("\nJenis Buku: \n");
+            printf("1. Novel\n");
+            printf("2. Sejarah\n");
+            printf("3. Pembelajaran\n");
+            printf("4. Lainnya\n");
+            int newBookType = 0;
+            while (true)
+            {
+                char input[20];
+                printf("Masukkan jenis buku yang baru (1-4): ");
+                scanf("%[^\n]s", input);
+                getchar();
+                if (isValidNumber(input, false, false))
+                {
+                    newBookType = atoi(input);
+                    if (newBookType >= NOVEL && newBookType <= OTHERS)
+                    {
+                        listBook[indexToEdit - 1].bookType = newBookType;
+                        break;
+                    }
+                }
+                printf("Jenis Buku tidak valid. Silahkan pilih dari daftar yang tersedia.\n");
+            }
+            printf("Jenis Buku Berhasil Diubah ");
+            while (getchar() != '\n')
+            {
+            }
+            break;
+
+        case 4:
+            // Edit Stok Buku
+            printf("Masukkan jumlah stok baru: ");
+            int newStock = 0;
+            while (true)
+            {
+                char input[20];
+                scanf("%[^\n]s", input);
+                getchar();
+                if (isValidNumber(input, false, false))
+                {
+                    newStock = atoi(input);
+                    if (newStock >= 0)
+                    {
+                        listBook[indexToEdit - 1].stock = newStock;
+                        break;
+                    }
+                }
+                printf("Stok Buku harus merupakan angka yang valid.\n");
+            }
+            printf("Jumlah Stok Buku Berhasil Diubah ");
+            while (getchar() != '\n')
+            {
+            }
+            break;
+
+        case 5:
+            // Edit Harga Buku
+            printf("Masukkan harga buku yang baru: Rp ");
+            float newPrice = 0;
+            while (true)
+            {
+                char input[20];
+                scanf("%[^\n]s", input);
+                getchar();
+                if (isValidNumber(input, false, true))
+                {
+                    newPrice = atof(input);
+                    if (newPrice >= 0)
+                    {
+                        listBook[indexToEdit - 1].price = newPrice;
+                        break;
+                    }
+                }
+                printf("Harga Buku tidak valid.\n");
+            }
+            printf("Harga Buku Berhasil Diubah");
+            while (getchar() != '\n')
+            {
+            }
+            break;
+
+        case 6:
+            // Kembali ke Menu Utama
+            printf("Kembali ke Menu Utama.\n");
+            while (getchar() != '\n')
+            {
+            }
+            break;
+        }
+
+        printf("\nTekan enter untuk kembali ke menu utama...");
+        while (getchar() != '\n')
+        {
+        }
+    }
+}
+
 char *trim(char *s)
 {
     int i = strlen(s) - 1;
